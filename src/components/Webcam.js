@@ -54,10 +54,11 @@ class Webcam extends Component {
       console.log('running predictions');
       let children = [];
       this.model.detect(video).then(function (predictions) {
+        console.log(predictions);
         container.querySelectorAll('p').forEach(n => n.remove());
         container.querySelectorAll('div').forEach(n => n.remove());
         for (let n = 0; n < predictions.length; n++) {
-          if (predictions[n].score > 0.6) {
+          if (predictions[n].class === "person" && predictions[n].score > 0.6) {
             const p = document.createElement('p');
             p.innerText = predictions[n].class  + ' - with '
                 + Math.round(parseFloat(predictions[n].score) * 100)
