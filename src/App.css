@@ -61,3 +61,7 @@
   z-index: 1;
   position: absolute;
 }
+
+.score {
+  font-size: 48px;
+}

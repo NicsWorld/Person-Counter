@@ -1,17 +1,13 @@
 import React, {Component} from 'react';
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 
-
 class Webcam extends Component {
 
   constructor(props) {
     super(props);
-    // this.model = this.model;
-    // this.predictions = this.predictions;
-    // this.predictWebcam = this.predictWebcam.bind(this);
     this.runPredictions = this.runPredictions.bind(this);
     this.state = {
-      class: ''
+      count: 0
     };
   };
   loadModel = async() => {
@@ -24,7 +20,6 @@ class Webcam extends Component {
     const video = document.getElementById('webcam');
 
     if(this.getUserMediaSupported()) {
-
       //only get video not audio
       const constraints = {
         video: true
@@ -32,15 +27,13 @@ class Webcam extends Component {
 
       navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
         video.srcObject= stream;
-        // video.addEventListener('loadeddata', this.loadModel().then(() => {
-        //   setInterval(this.runPredictions, 1000);
-        // }));
+
       });
       video.onloadeddata = (event) => {
         this.loadModel()
         .then(() => {
-          setInterval(this.runPredictions, 1000);
-        // window.requestAnimationFrame(this.runPredictions);
+          setInterval(this.runPredictions, 500);
+          // this.runPredictions()
         }); }
 
     }
@@ -50,15 +43,17 @@ class Webcam extends Component {
   runPredictions() {
     const video = document.getElementById('webcam');
     const container = document.getElementById('webcam-container');
-
-      console.log('running predictions');
+    // const {count} = this.state;
       let children = [];
       this.model.detect(video).then(function (predictions) {
-        console.log(predictions);
         container.querySelectorAll('p').forEach(n => n.remove());
         container.querySelectorAll('div').forEach(n => n.remove());
         for (let n = 0; n < predictions.length; n++) {
+          console.log(predictions[n]);
           if (predictions[n].class === "person" && predictions[n].score > 0.6) {
+            this.setState(prevState => {
+               return {count: prevState.count + 1}
+            })
             const p = document.createElement('p');
             p.innerText = predictions[n].class  + ' - with '
                 + Math.round(parseFloat(predictions[n].score) * 100)
@@ -80,7 +75,7 @@ class Webcam extends Component {
             children.push(p);
           }
         }
-      });
+      }.bind(this));
 }
 
   getUserMediaSupported() {
@@ -92,8 +87,11 @@ class Webcam extends Component {
 
     render() {
       return (
+        <div>
         <div id="webcam-container">
           <video id="webcam" autoPlay width="640" height="480"></video>
+        </div>
+        <div className="score">People counted: {this.state.count}</div>
         </div>
       );
     }
