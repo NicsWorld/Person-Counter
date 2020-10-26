@@ -53,7 +53,7 @@ class Webcam extends Component {
           if (predictions[n].class === "person" && predictions[n].score > 0.6) {
             this.setState(prevState => {
                return {count: prevState.count + 1}
-            })
+            });
             const p = document.createElement('p');
             p.innerText = predictions[n].class  + ' - with '
                 + Math.round(parseFloat(predictions[n].score) * 100)
