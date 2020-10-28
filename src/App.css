@@ -64,4 +64,11 @@
 
 .score {
   font-size: 48px;
+  margin-bottom: 20px;
+}
+.info {
+  font-size: 48px;
+}
+video {
+  object-fit: fill;
 }
