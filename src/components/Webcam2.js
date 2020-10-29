@@ -68,7 +68,7 @@ determineIfEntered() {
       const center = x + width/2;
 
       if (prediction.class === "person" && prediction.score > 0.6) {
-        if(center <= 305 && center >= 302 && previousCenter <= 315) {
+        if(center <= 320 && center >= 315 && previousCenter <= 315) {
           this.setState(prevState => {
              return {
                count: prevState.count - 1,
@@ -77,7 +77,7 @@ determineIfEntered() {
              }
           });
         }
-        if(center >= 335 && center <= 337 && previousCenter <= 335) {
+        if(center >= 325 && center <= 330 && previousCenter <= 330) {
             this.setState(prevState => {
                return {
                  count: prevState.count + 1,
