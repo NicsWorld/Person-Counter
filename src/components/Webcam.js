@@ -7,8 +7,13 @@ class Webcam extends Component {
     super(props);
     this.runPredictions = this.runPredictions.bind(this);
     this.state = {
-      count: 0
+      count: 0,
+      previousX: ''
     };
+  };
+  stylesCanvas = {
+    position: 'fixed',
+    left: 0,
   };
   loadModel = async() => {
     console.log('loading model');
@@ -17,10 +22,18 @@ class Webcam extends Component {
   }
 
   componentDidMount() {
+    const canvas = document.getElementById('canvas2');
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = "#FF0000";
+    ctx.lineWidth = 10;
+
+    ctx.beginPath();       // Start a new path
+    ctx.moveTo(320, 0);    // Move the pen to (30, 50)
+    ctx.lineTo(320, 720);  // Draw a line to (150, 100)
+    ctx.stroke();          // Render the path
     const video = document.getElementById('webcam');
 
     if(this.getUserMediaSupported()) {
-      //only get video not audio
       const constraints = {
         video: true
       };
@@ -32,7 +45,7 @@ class Webcam extends Component {
       video.onloadeddata = (event) => {
         this.loadModel()
         .then(() => {
-          setInterval(this.runPredictions, 500);
+          setInterval(this.runPredictions, 50);
           // this.runPredictions()
         }); }
 
@@ -49,18 +62,25 @@ class Webcam extends Component {
         container.querySelectorAll('p').forEach(n => n.remove());
         container.querySelectorAll('div').forEach(n => n.remove());
         for (let n = 0; n < predictions.length; n++) {
-          console.log(predictions[n]);
           if (predictions[n].class === "person" && predictions[n].score > 0.6) {
-            this.setState(prevState => {
-               return {count: prevState.count + 1}
-            });
-            const p = document.createElement('p');
-            p.innerText = predictions[n].class  + ' - with '
-                + Math.round(parseFloat(predictions[n].score) * 100)
-                + '% confidence.';
-            p.style = 'margin-left: ' + predictions[n].bbox[0] + 'px; margin-top: '
-                + (predictions[n].bbox[1] - 10) + 'px; width: '
-                + (predictions[n].bbox[2] - 10) + 'px; top: 0; left: 0;';
+            const previousX = this.state.previousX;
+            console.log(predictions[n]);
+            const x = predictions[n].bbox[0];
+            if(x <= 315 && x >= 300 && previousX <= 310) {
+              this.setState(prevState => {
+                 return {
+                   count: prevState.count + 1
+                 }
+              });
+            }
+
+            if(x >= 325 && x <= 340 && previousX >= 325) {
+                this.setState(prevState => {
+                   return {
+                     count: prevState.count - 1
+                   }
+                });
+            }
 
             const highlighter = document.createElement('div');
             highlighter.setAttribute('class', 'highlighter');
@@ -70,10 +90,13 @@ class Webcam extends Component {
                 + predictions[n].bbox[3] + 'px;';
 
             container.appendChild(highlighter);
-            container.appendChild(p);
+            // container.appendChild(p);
             children.push(highlighter);
-            children.push(p);
+            // children.push(p);
           }
+          this.setState({
+            previousX: predictions[n].bbox[0]
+          })
         }
       }.bind(this));
 }
@@ -90,8 +113,10 @@ class Webcam extends Component {
         <div>
         <div id="webcam-container">
           <video id="webcam" autoPlay width="640" height="480"></video>
+          <canvas id="canvas2" style={this.stylesCanvas} ref={this.canvasRef2} width="640" height="480"/>
         </div>
         <div className="score">People counted: {this.state.count}</div>
+        <div className="score">PreviousX: {this.state.previousX}</div>
         </div>
       );
     }

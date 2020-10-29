@@ -7,8 +7,9 @@ class Webcam2 extends Component {
     this.state = {
       count: 0,
       currentInfo: '',
-      previousCenter: '',
-      currentState: ''
+      previousX: '',
+      currentState: '',
+      logging: ''
     };
   };
   videoRef = React.createRef();
@@ -54,7 +55,7 @@ determineIfEntered() {
 
   showDetections = predictions => {
     const ctx = this.canvasRef.current.getContext("2d");
-    const previousCenter = this.state.previousCenter;
+    const previousX = this.state.previousX;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     const font = "24px helvetica";
     ctx.font = font;
@@ -65,22 +66,32 @@ determineIfEntered() {
       const y = prediction.bbox[1];
       const width = prediction.bbox[2];
       const height = prediction.bbox[3];
-      const center = x + width/2;
+      // const x = x;
+
+      if(x > 400) {
+        this.setState({
+          logging:{
+            x,
+            width,
+            x
+          }
+        })
+      }
 
       if (prediction.class === "person" && prediction.score > 0.6) {
-        if(center <= 320 && center >= 315 && previousCenter <= 315) {
+        if(x <= 315 && x >= 300 && previousX <= 310) {
           this.setState(prevState => {
              return {
-               count: prevState.count - 1,
+               count: prevState.count + 1,
                currentInfo: prediction.bbox,
                currentState: 'Entered!'
              }
           });
         }
-        if(center >= 325 && center <= 330 && previousCenter <= 330) {
+        if(x >= 325 && x <= 340 && previousX >= 325) {
             this.setState(prevState => {
                return {
-                 count: prevState.count + 1,
+                 count: prevState.count - 1,
                  currentInfo: prediction.bbox,
                  currentState: 'Exited!'
                }
@@ -91,24 +102,10 @@ determineIfEntered() {
         ctx.strokeRect(x, y, width, height);
         ctx.fillStyle = "#2fff00";
 
-        //my attempt to find the middle of the bbox
-        // ctx.beginPath();       // Start a new path
-        // ctx.moveTo(width/2, y);    // Move the pen to (30, 50)
-        // ctx.lineTo(width/2, height);  // Draw a line to (150, 100)
-        // ctx.stroke();
-
-        // const textWidth = ctx.measureText(prediction.class).width;
-        // const textHeight = parseInt(font, 10);
-        //
-        // ctx.fillRect(x, y, textWidth + 10, textHeight + 10);
-        // ctx.fillRect(x, y + height - textHeight, textWidth + 15, textHeight + 10);
-        //
-        // ctx.fillStyle = "#000000";
-        // ctx.fillText(prediction.class, x, y);
-        // ctx.fillText(prediction.score.toFixed(2), x, y + height - textHeight);
       } //person
       this.setState({
-        previousCenter: prediction.bbox[0] + width/2
+        previousX: x,
+        currentInfo: prediction.bbox
       });
     });
   };
@@ -171,10 +168,11 @@ determineIfEntered() {
         <canvas id="canvas" style={this.stylesCanvas} ref={this.canvasRef} width="640" height="480"/>
         <canvas id="canvas2" style={this.stylesCanvas} ref={this.canvasRef2} width="640" height="480"/>
         <div className="score">People counted: {this.state.count}</div>
-        <div className="info">Info: x: {this.state.currentInfo[0]} PREVIOUS X: {Math.round(this.state.previousCenter)} Direction: {this.state.currentState}</div>
+        <div className="info">Info: x: {this.state.currentInfo[0]} width: {this.state.currentInfo[2]}</div>
+        <div>Over 400:{this.state.logging.x} {this.state.logging.width} {this.state.logging.x}</div>
       </div>
     );
   }
 }
-
+// PREVIOUS X: {Math.round(this.state.previousX)}
 export default Webcam2;

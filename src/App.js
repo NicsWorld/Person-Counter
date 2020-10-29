@@ -1,5 +1,5 @@
 import React from 'react';
-import Webcam2 from './components/Webcam2';
+import Webcam from './components/Webcam';
 import './App.css';
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
       <header className="App-header">
         Person Counter
         </header>
-        <Webcam2 />
+        <Webcam />
 
     </div>
   );
