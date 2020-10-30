@@ -8,7 +8,8 @@ class Webcam extends Component {
     this.runPredictions = this.runPredictions.bind(this);
     this.state = {
       count: 0,
-      previousX: ''
+      previousX: '',
+      previousCenter: ''
     };
   };
   stylesCanvas = {
@@ -45,7 +46,7 @@ class Webcam extends Component {
       video.onloadeddata = (event) => {
         this.loadModel()
         .then(() => {
-          setInterval(this.runPredictions, 50);
+          setInterval(this.runPredictions, 10);
           // this.runPredictions()
         }); }
 
@@ -66,7 +67,7 @@ class Webcam extends Component {
             const previousX = this.state.previousX;
             console.log(predictions[n]);
             const x = predictions[n].bbox[0];
-            if(x <= 315 && x >= 300 && previousX <= 310) {
+            if(x <= 315 && x >= 300 && previousX < 300) {
               this.setState(prevState => {
                  return {
                    count: prevState.count + 1
@@ -74,7 +75,7 @@ class Webcam extends Component {
               });
             }
 
-            if(x >= 325 && x <= 340 && previousX >= 325) {
+            if(x >= 325 && x <= 340 && previousX >= 340) {
                 this.setState(prevState => {
                    return {
                      count: prevState.count - 1
@@ -95,7 +96,8 @@ class Webcam extends Component {
             // children.push(p);
           }
           this.setState({
-            previousX: predictions[n].bbox[0]
+            previousX: predictions[n].bbox[0],
+            previousCenter: predictions[n].bbox[0] + (predictions[n].bbox[2]/2)
           })
         }
       }.bind(this));
@@ -117,6 +119,7 @@ class Webcam extends Component {
         </div>
         <div className="score">People counted: {this.state.count}</div>
         <div className="score">PreviousX: {this.state.previousX}</div>
+        <div className="score">previousCenter: {this.state.previousCenter}</div>
         </div>
       );
     }
